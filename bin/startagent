@@ -1,0 +1,23 @@
+#!/bin/sh
+# ghetto sharing of agent across shells in WSL
+
+set -e
+
+agent_file="$HOME/.ssh_agent_setup"
+
+# clean up old agent stuff
+pkill ssh-agent || true
+if [ -e $agent_file ]; then
+	rm -f $agent_file
+fi
+
+# start agent and dump credentials
+eval `ssh-agent -s`
+echo "export SSH_AUTH_SOCK=$SSH_AUTH_SOCK
+export SSH_AGENT_PID=$SSH_AGENT_PID" > $agent_file
+chmod 400 $agent_file
+ssh-add
+
+# so we can source this safely
+set +e
+
